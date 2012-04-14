@@ -50,6 +50,11 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
     private int column;
     private boolean running = true;
     private final static int SECOND = 1000; // number of millis in a second
+    private int howFarWeHaveGone;
+    private boolean weHaveBeenBumped = false;
+    private int[] c = {60, 200};
+    private int[] e = {64, 200};
+    private int[] g = {67, 200};
 
     /**
      * Constructs a Ferrari, an amazing machine!
@@ -73,70 +78,96 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
      */
     public void run()
     {
+        try
+        {
+            song(1, c);
+            song(2, e);
+            song(3, g);
+        } catch (ConnectionLostException ex)
+        {
+        }
         dashboard.log("Running ...");
-        while (running)
+        goForward(100, 100);
+        while (true)
         {
             try
             {
                 readSensors(SENSORS_GROUP_ID6);
-                int previousValue = -1;
-                int currentValue = getInfraredByte();
-                if (previousValue != currentValue)
+
+                if (isBumpRight() && isBumpLeft())//forward
                 {
-                    previousValue = currentValue;
-                    dashboard.log("" + currentValue);
-                }
-                if (getInfraredByte() == RED_BUOY_CODE)
+                    playSong(1);
+                    weHaveBeenBumped = true;
+                    hitStraight();
+                } else
                 {
-                    driveDirect(60, 50);
-                    dashboard.log("red buoy" + currentValue);
-                }
-                if (getInfraredByte() == 255) //doesnt see
-                {
-                    driveDirect(-100, 100); // || getInfraredByte() != 255);                                problem here with spinning WHILE reading sensors
-                    dashboard.log("reserved" + currentValue);
-                    SystemClock.sleep(5000);
-                    driveDirect(100, 100); 
-                }
-                if (getInfraredByte() == GREEN_BUOY_CODE)
-                {
-                    driveDirect(50, 60);
-                    dashboard.log("green buoy" + currentValue);
-                }
-                if (getInfraredByte() == BOTH_BUOY_CODE)
-                {
-                    driveDirect(50, 50);
-                    dashboard.log("red and green buoy" + currentValue);
-                }
-                if (getInfraredByte() == RED_BUOY_FORCE_FIELD_CODE)
-                {
-                    driveDirect(70, 60);
-                    dashboard.log("red buoy and force field" + currentValue);
-                }
-                if (getInfraredByte() == GREEN_BUOY_FORCE_FIELD_CODE)
-                {
-                    driveDirect(60, 70);
-                    dashboard.log("green buoy and force field" + currentValue);
-                }
-                if (getInfraredByte() == BOTH_BUOY_FORCE_FIELD_CODE)
-                {
-                    driveDirect(70, 70);
-                    dashboard.log("both buoy and force field" + currentValue);
+                    if (isBumpRight())
+                    {
+                        playSong(2);
+                        weHaveBeenBumped = true;
+                        hitRight();
+                    }
+                    if (isBumpLeft())
+                    {
+                        playSong(3);
+                        weHaveBeenBumped = true;
+                        hitLeft();
+                    }
                 }
             } catch (ConnectionLostException ex)
             {
             }
+
+//                int previousValue = -1;
+//                int currentValue = getInfraredByte();
+//                if (previousValue != currentValue)
+//                {
+//                    previousValue = currentValue;
+//                    dashboard.log("" + currentValue);
+//                }
+//                if (getInfraredByte() == RED_BUOY_CODE)
+//                {
+//                    driveDirect(60, 50);
+//                    dashboard.log("red buoy" + currentValue);
+//                }
+//                if (getInfraredByte() == 255) //doesnt see
+//                {
+//                    driveDirect(-100, 100); // || getInfraredByte() != 255);                                problem here with spinning WHILE reading sensors
+//                    dashboard.log("reserved" + currentValue);
+//                    SystemClock.sleep(5000);
+//                    driveDirect(100, 100);
+//                }
+//                if (getInfraredByte() == GREEN_BUOY_CODE)
+//                {
+//                    driveDirect(50, 60);
+//                    dashboard.log("green buoy" + currentValue);
+//                }
+//                if (getInfraredByte() == BOTH_BUOY_CODE)
+//                {
+//                    driveDirect(50, 50);
+//                    dashboard.log("red and green buoy" + currentValue);
+//                }
+//                if (getInfraredByte() == RED_BUOY_FORCE_FIELD_CODE)
+//                {
+//                    driveDirect(70, 60);
+//                    dashboard.log("red buoy and force field" + currentValue);
+//                }
+//                if (getInfraredByte() == GREEN_BUOY_FORCE_FIELD_CODE)
+//                {
+//                    driveDirect(60, 70);
+//                    dashboard.log("green buoy and force field" + currentValue);
+//                }
+//                if (getInfraredByte() == BOTH_BUOY_FORCE_FIELD_CODE)
+//                {
+//                    driveDirect(70, 70);
+//                    dashboard.log("both buoy and force field" + currentValue);
+//                }
+
         }
-//            turnAndGo(0, 1000);
-//            turnAndGo(-120, 1000);
-//            turnAndGo(-120, 1000);
-//            turnAndGo(-120, 0);
-        // Testing the ultrasonic sensors
-        //testUltraSonicSensors();
-        dashboard.log("Run completed.");
-        dashboard.log("Shutting down ...");
-        shutDown();
-        setRunning(false);
+//        dashboard.log("Run completed.");
+//        dashboard.log("Shutting down ...");
+//        shutDown();
+//        setRunning(false);
     }
 
     /**
@@ -310,5 +341,87 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
     private synchronized void setRunning(boolean b)
     {
         running = false;
+    }
+
+    /**
+     * *************************************************************************
+     * Jack Super API
+     * *************************************************************************
+     */
+    private void goForward(int leftWheelSpeed, int rightWheelSpeed)
+    {
+        try
+        {
+            driveDirect(leftWheelSpeed, rightWheelSpeed);
+        } catch (ConnectionLostException ex)
+        {
+        }
+    }
+
+    private void goBackward(int leftWheelSpeed, int rightWheelSpeed)
+    {
+        try
+        {
+            driveDirect(leftWheelSpeed, rightWheelSpeed);
+        } catch (ConnectionLostException ex)
+        {
+        }
+    }
+
+    private void goForward(int leftWheelSpeed,int rightWheelSpeed,int howFarWeWantToGo)
+    {
+        howFarWeHaveGone = howFarWeHaveGone + getDistance();
+        dashboard.log("how far we have gone " + howFarWeHaveGone);
+        if (howFarWeHaveGone >= howFarWeWantToGo)
+        {
+            howFarWeHaveGone = 0;
+            weHaveBeenBumped = false;
+            stop();
+        }
+    }
+
+    private void goBackward(int leftWheelSpeed,int rightWheelSpeed,int howFarWeWantToGo)
+    {
+        howFarWeHaveGone = howFarWeHaveGone + getDistance();
+        dashboard.log("how far we have gone " + howFarWeHaveGone);
+        if (howFarWeHaveGone >= howFarWeWantToGo)
+        {
+            howFarWeHaveGone = 0;
+            weHaveBeenBumped = false;
+            goForward(leftWheelSpeed,rightWheelSpeed);
+        }
+    }
+
+    private void stop()
+    {
+        try
+        {
+            driveDirect(0, 0);
+        } catch (ConnectionLostException ex)
+        {
+        }
+    }
+
+    private void hitRight()
+    {
+        if(weHaveBeenBumped)
+        {
+            goBackward(-50, -100, 1000);// left wheel, right wheel
+        }
+    }
+
+    private void hitLeft()
+    {
+        if (weHaveBeenBumped)
+        {
+            goBackward(-100, -50, 1000);
+        }
+    }
+
+    private void hitStraight()
+    {
+            goBackward(-100, -100);
+            SystemClock.sleep(1000);
+            goForward(100, 100);
     }
 }
