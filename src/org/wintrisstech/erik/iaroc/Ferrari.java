@@ -3,8 +3,6 @@ package org.wintrisstech.erik.iaroc;
 import android.os.SystemClock;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.wintrisstech.irobot.ioio.IRobotCreateAdapter;
 import org.wintrisstech.irobot.ioio.IRobotCreateInterface;
 import org.wintrisstech.irobot.ioio.IRobotCreateScript;
@@ -435,47 +433,55 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
         }
     }
 
-    private void hitRight()
-    {
-        if (weHaveBeenBumped)
-        {
-            goBackward(-50, -100, 1000);// left wheel, right wheel
-        }
-    }
-
-    private void hitLeft()
-    {
-        if (weHaveBeenBumped)
-        {
-            goBackward(-100, -50, 1000);
-        }
-    }
-
-    private void hitStraight()
-    {
-        goBackward(-100, -100);
-        SystemClock.sleep(1000);
-        goForward(100, 100);
-    }
-
+//    private void hitRight()
+//    {
+//        if (weHaveBeenBumped)
+//        {
+//            goBackward(-50, -100, 1000);// left wheel, right wheel
+//        }
+//    }
+//
+//    private void hitLeft()
+//    {
+//        if (weHaveBeenBumped)
+//        {
+//            goBackward(-100, -50, 1000);
+//        }
+//    }
+//
+//    private void hitStraight()
+//    {
+//        goBackward(-100, -100);
+//        SystemClock.sleep(1000);
+//        goForward(100, 100);
+//    }
     private void backingUp(String direction) throws Exception
     {
+        driveDirect(-500, -500);//backs up at max speed
         dashboard.log("backingup");
         if (direction.equals("right"))
         {
-            driveDirect(-75, -50);
+            driveDirect(100, -100);
+            SystemClock.sleep(1000);
+            /*
+             * spins 45 degrees to the right
+             */
         }
         if (direction.equals("left"))
         {
-            driveDirect(-50, -75);
+            driveDirect(-100, 100);
+            /*
+             * spins45 degrees to the left
+             */
         }
         if (direction.equals("straight"))
         {
-            driveDirect(-75, -75);
+            driveDirect(-100, -100);
         }
-        SystemClock.sleep(2000);
-        driveDirect(100, 100);
+//        SystemClock.sleep(2000);
+        driveDirect(100, 100);//drive direct needs to go forward more
         statePointer = 0;
+        presentState = 0;
         dashboard.log("hi");
     }
 
@@ -511,7 +517,8 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
 
     public void setStatePointer() throws ConnectionLostException
     {
-        readSensors(SENSORS_GROUP_ID6);
+        readSensors(SENSORS_BUMPS_AND_WHEEL_DROPS);
+//        SystemClock.sleep(00);
         dashboard.log("statepointer");
         dashboard.log("is bump right" + isBumpRight());
         dashboard.log("is bump left" + isBumpLeft());
