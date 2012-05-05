@@ -16,7 +16,6 @@ import org.wintrisstech.sensors.UltraSonicSensors;
  */
 public class Ferrari extends IRobotCreateAdapter implements Runnable
 {
-
     private static final String TAG = "Ferrari";
     private final UltraSonicSensors ultraSonicSensors;
     private final Dashboard dashboard;
@@ -458,8 +457,10 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
 //    }
     private void backingUp(String direction) throws Exception
     {
-       
+        
         dashboard.log("backingup");
+        driveDirect(-200,-200);
+        SystemClock.sleep(1000);
         if (direction.equals("right"))
         {
             driveDirect(100, -100);
@@ -478,8 +479,7 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
         }
         if (direction.equals("straight"))
         {
-            int r = (int)(Math.random() * 2);
-            SystemClock.sleep(1000);
+            int r = (int) (Math.random() * 2);
 
             if (r == 1)
             {
@@ -489,21 +489,21 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
             if (r == 0)
             {
                 driveDirect(-100, 100);
-                dashboard.log("~left" + r);
+                dashboard.log("~left /" + r);
             }
-
+            SystemClock.sleep(1000);
         }
 //        SystemClock.sleep(2000);
         driveDirect(100, 100);//drive direct needs to go forward more
         statePointer = 0;
         presentState = 0;
-       // dashboard.log("hi");
+        // dashboard.log("hi");
     }
 
     public void stateController() throws Exception
     {
         driveDirect(100, 100);
-       // dashboard.log("in state contol");
+        // dashboard.log("in state contol");
         while (true)
         {
             setStatePointer();
@@ -534,9 +534,9 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
     {
         readSensors(SENSORS_BUMPS_AND_WHEEL_DROPS);
 //        SystemClock.sleep(00);
-       // dashboard.log("statepointer");
-       // dashboard.log("is bump right" + isBumpRight());
-       // dashboard.log("is bump left" + isBumpLeft());
+        // dashboard.log("statepointer");
+        // dashboard.log("is bump right" + isBumpRight());
+        // dashboard.log("is bump left" + isBumpLeft());
 
         if (isBumpRight() && !isBumpLeft())//Right
         {
@@ -555,7 +555,7 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
         }
         if (!isBumpLeft() && !isBumpRight())//none
         {
-            dashboard.log("no bump detected");
+            // dashboard.log("no bump detected");
             statePointer = 0;
         }
     }
