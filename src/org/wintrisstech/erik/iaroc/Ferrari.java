@@ -3,6 +3,7 @@ package org.wintrisstech.erik.iaroc;
 import android.os.SystemClock;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
+import java.util.Random;
 import org.wintrisstech.irobot.ioio.IRobotCreateAdapter;
 import org.wintrisstech.irobot.ioio.IRobotCreateInterface;
 import org.wintrisstech.irobot.ioio.IRobotCreateScript;
@@ -457,7 +458,7 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
 //    }
     private void backingUp(String direction) throws Exception
     {
-        driveDirect(-500, -500);//backs up at max speed
+       
         dashboard.log("backingup");
         if (direction.equals("right"))
         {
@@ -470,25 +471,39 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
         if (direction.equals("left"))
         {
             driveDirect(-100, 100);
+            SystemClock.sleep(1000);
             /*
              * spins45 degrees to the left
              */
         }
         if (direction.equals("straight"))
         {
-            driveDirect(-100, -100);
+            int r = (int)(Math.random() * 2);
+            SystemClock.sleep(1000);
+
+            if (r == 1)
+            {
+                driveDirect(100, -100);
+                dashboard.log("~right /" + r);
+            }
+            if (r == 0)
+            {
+                driveDirect(-100, 100);
+                dashboard.log("~left" + r);
+            }
+
         }
 //        SystemClock.sleep(2000);
         driveDirect(100, 100);//drive direct needs to go forward more
         statePointer = 0;
         presentState = 0;
-        dashboard.log("hi");
+       // dashboard.log("hi");
     }
 
     public void stateController() throws Exception
     {
         driveDirect(100, 100);
-        dashboard.log("in state contol");
+       // dashboard.log("in state contol");
         while (true)
         {
             setStatePointer();
@@ -519,9 +534,9 @@ public class Ferrari extends IRobotCreateAdapter implements Runnable
     {
         readSensors(SENSORS_BUMPS_AND_WHEEL_DROPS);
 //        SystemClock.sleep(00);
-        dashboard.log("statepointer");
-        dashboard.log("is bump right" + isBumpRight());
-        dashboard.log("is bump left" + isBumpLeft());
+       // dashboard.log("statepointer");
+       // dashboard.log("is bump right" + isBumpRight());
+       // dashboard.log("is bump left" + isBumpLeft());
 
         if (isBumpRight() && !isBumpLeft())//Right
         {
